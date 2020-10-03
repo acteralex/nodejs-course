@@ -28,6 +28,7 @@ function checkOnErrors() {
       ', '
     )} properties. Set needed properties and run it again.`;
     process.stderr.write(`${errorMessage}\n`);
+    process.exitCode = 400;
   }
 }
 
