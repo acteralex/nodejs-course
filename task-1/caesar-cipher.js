@@ -58,9 +58,7 @@ function getOutputStream() {
 }
 
 function readInput() {
-  return process.stdin.on('data', () => {
-    process.stdin.pause();
-  });
+  return process.stdin;
 }
 
 function writeInput() {
@@ -83,14 +81,3 @@ function writeFile() {
     flags: 'a'
   });
 }
-
-// function writeInputAgain() {
-//   process.stdout.write(`Do you want to ${options.action} more? (y/n)`);
-//   process.stdin.once('data', data => {
-//     if (data.toString() === 'y') {
-//       process.stdin.resume();
-//     } else {
-//       process.stdin.end();
-//     }
-//   });
-// }
