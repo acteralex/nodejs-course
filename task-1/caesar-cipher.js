@@ -35,7 +35,10 @@ isValidAsync(options)
 function run() {
   pipeline(
     getInputStream(),
-    getTransformStream(options.action, options.shift),
+    getTransformStream(
+      options[optionsEnum.ACTION.name],
+      options[optionsEnum.SHIFT.name]
+    ),
     getOutputStream(),
     err => {
       if (err) {
@@ -46,11 +49,13 @@ function run() {
 }
 
 function getInputStream() {
-  return options.input === undefined ? readInput() : readFile(options.input);
+  return options[optionsEnum.INPUT.name] === undefined
+    ? readInput()
+    : readFile(options[optionsEnum.INPUT.name]);
 }
 
 function getOutputStream() {
-  return options.output === undefined
+  return options[optionsEnum.OUTPUT.name] === undefined
     ? writeInput()
-    : writeFile(options.output);
+    : writeFile(options[optionsEnum.OUTPUT.name]);
 }
