@@ -1,7 +1,8 @@
+const optionsEnum = require('./options.enum');
 const fs = require('fs');
 const { Transform, Writable, pipeline } = require('stream');
 const { Command } = require('commander');
-const { OptionsValidator } = require('./options-validator');
+const { OptionsValidator } = require('./options.validator');
 const { CaesarCipher } = require('./caesar-cipher');
 
 const program = new Command();
@@ -12,26 +13,32 @@ program
   .name('caesar-cipher');
 // .exitOverride();
 
-program
-  .option('-a, --action <action>', 'an action encode/decode') // TODO: use requiredOption, but how to handle error?
-  .option('-s, --shift <shift>', 'a shift', parseInt) // TODO: 1) add logic to convert to INT 2) use requiredOption, but how to handle error?
-  .option('-i, --input <input>', 'an input file')
-  .option('-o, --output <output>', 'an output file');
+Object.values(optionsEnum).forEach(o => {
+  program.option(
+    `-${o.shortName}, --${o.name} <${o.name}>`,
+    o.description,
+    o.mapFn,
+    o.defaultValue
+  );
+});
 
 program.parse(process.argv);
 
 const options = program.opts();
 
-if (OptionsValidator.isValid(options)) {
-  run();
-}
+OptionsValidator.isValidAsync(options)
+  .then(() => run())
+  .catch(errorMessages => {
+    process.stderr.write(`${errorMessages.join('\n')}\n`);
+    process.exitCode = 400;
+  });
 
 function run() {
   pipeline(getInputStream(), getTransformStream(), getOutputStream(), err => {
     if (err) {
-      console.log('error');
+      // console.log('error');
     } else {
-      console.log('then');
+      // console.log('then');
     }
   });
 }
@@ -76,7 +83,10 @@ function readFile() {
 }
 
 function writeFile() {
-  return fs.createWriteStream(options.output);
+  // fs.existsSync
+  return fs.createWriteStream(options.output, {
+    flags: 'ax'
+  });
 }
 
 // function writeInputAgain() {
