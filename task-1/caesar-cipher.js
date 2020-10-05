@@ -1,9 +1,12 @@
 const optionsEnum = require('./options/options.enum');
-const fs = require('fs');
-const { Transform, Writable, pipeline } = require('stream');
+const { pipeline } = require('stream');
 const { Command } = require('commander');
 const { isValidAsync } = require('./options/validators/validator');
-const { CaesarCipher } = require('./cipher/caesar');
+const { readInput } = require('./program-utils/read-input.stream');
+const { readFile } = require('./program-utils/read-file.stream');
+const { writeInput } = require('./program-utils/write-input.stream');
+const { writeFile } = require('./program-utils/write-file.stream');
+const { getTransformStream } = require('./program-utils/transform.stream');
 
 const program = new Command('caesar-cipher');
 
@@ -30,54 +33,24 @@ isValidAsync(options)
   });
 
 function run() {
-  pipeline(getInputStream(), getTransformStream(), getOutputStream(), err => {
-    if (err) {
-      console.log('Program finished with unhandled error');
+  pipeline(
+    getInputStream(),
+    getTransformStream(options.action, options.shift),
+    getOutputStream(),
+    err => {
+      if (err) {
+        console.log('Program finished with unhandled error');
+      }
     }
-  });
-}
-
-function getTransformStream() {
-  return new Transform({
-    transform(chunk, encoding, callback) {
-      const text = chunk.toString();
-      const action = (options.action === 'encode'
-        ? CaesarCipher.getEncodeFn
-        : CaesarCipher.getDecodeFn)(options.shift);
-      callback(null, action(text));
-    }
-  });
+  );
 }
 
 function getInputStream() {
-  return options.input === undefined ? readInput() : readFile();
+  return options.input === undefined ? readInput() : readFile(options.input);
 }
 
 function getOutputStream() {
-  return options.output === undefined ? writeInput() : writeFile();
-}
-
-function readInput() {
-  return process.stdin;
-}
-
-function writeInput() {
-  return new Writable({
-    write(chunk, encoding, callback) {
-      process.stdout.write(`${chunk}\n`);
-      callback(null);
-    }
-  });
-}
-
-function readFile() {
-  return fs.createReadStream(options.input, {
-    flags: 'r'
-  });
-}
-
-function writeFile() {
-  return fs.createWriteStream(options.output, {
-    flags: 'a'
-  });
+  return options.output === undefined
+    ? writeInput()
+    : writeFile(options.output);
 }
