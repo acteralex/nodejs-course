@@ -92,7 +92,6 @@ function allowWriteFileAsync(isOptionValueFilled) {
 }
 
 function checkAccessForFileAsync(filePath, mode, actionName) {
-  console.log('mode', mode);
   return new Promise(resolve => {
     fs.access(filePath, mode, err => {
       if (err) {

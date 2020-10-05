@@ -79,13 +79,14 @@ function writeInput() {
 }
 
 function readFile() {
-  return fs.createReadStream(options.input);
+  return fs.createReadStream(options.input, {
+    flags: 'r'
+  });
 }
 
 function writeFile() {
-  // fs.existsSync
   return fs.createWriteStream(options.output, {
-    flags: 'ax'
+    flags: 'a'
   });
 }
 
