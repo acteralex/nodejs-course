@@ -72,7 +72,7 @@ function readInput() {
 function writeInput() {
   return new Writable({
     write(chunk, encoding, callback) {
-      process.stdout.write(chunk);
+      process.stdout.write(`${chunk}\n`);
       callback(null);
     }
   });
