@@ -1,55 +1,96 @@
-const template = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const optionsEnum = require('./options/options.enum');
+const fs = require('fs');
+const { Transform, Writable, pipeline } = require('stream');
+const { Command } = require('commander');
+const { isValidAsync } = require('./options/validators/validator');
+const { CaesarCipher } = require('./cipher/caesar');
 
-function encrypt(txt, shift) {
-  return txt.slice(-shift, txt.length).concat(txt.slice(0, -shift));
-}
+const program = new Command('caesar-cipher');
 
-function map(text, dictionary) {
-  let newText = '';
-  for (let i = 0; i < text.length; i++) {
-    if (dictionary[text[i]]) {
-      newText += dictionary[text[i]];
-    } else {
-      newText += text[i];
+program.storeOptionsAsProperties(false).passCommandToAction(false);
+
+Object.values(optionsEnum).forEach(o => {
+  program.option(
+    `-${o.shortName}, --${o.name} <${o.name}>`,
+    o.description,
+    o.mapFn,
+    o.defaultValue
+  );
+});
+
+program.parse(process.argv);
+
+const options = program.opts();
+
+isValidAsync(options)
+  .then(() => run())
+  .catch(errorMessages => {
+    process.stderr.write(`${errorMessages.join('\n')}\n`);
+    process.exitCode = 400;
+  });
+
+function run() {
+  pipeline(getInputStream(), getTransformStream(), getOutputStream(), err => {
+    if (err) {
+      console.log('Program finished with unhandled error');
     }
-  }
-  return newText;
+  });
 }
 
-function createDictionary(encodedTemplate, isDirect) {
-  const dictionary = {};
-  let mapToDictionaryFn;
-  if (isDirect) {
-    mapToDictionaryFn = i => {
-      dictionary[template[i]] = encodedTemplate[i];
-      dictionary[template[i].toLowerCase()] = encodedTemplate[i].toLowerCase();
-    };
-  } else {
-    mapToDictionaryFn = i => {
-      dictionary[encodedTemplate[i]] = template[i];
-      dictionary[encodedTemplate[i].toLowerCase()] = template[i].toLowerCase();
-    };
-  }
-
-  for (let i = 0; i < template.length; i++) {
-    mapToDictionaryFn(i);
-  }
-  return dictionary;
+function getTransformStream() {
+  return new Transform({
+    transform(chunk, encoding, callback) {
+      const text = chunk.toString();
+      const action = (options.action === 'encode'
+        ? CaesarCipher.getEncodeFn
+        : CaesarCipher.getDecodeFn)(options.shift);
+      callback(null, action(text));
+    }
+  });
 }
 
-function getEncodeFn(shift) {
-  const encodedTemplate = encrypt(template, shift);
-  const dictionary = createDictionary(encodedTemplate, true);
-  return text => map(text, dictionary);
+function getInputStream() {
+  return options.input === undefined ? readInput() : readFile();
 }
 
-function getDecodeFn(shift) {
-  const encodedTemplate = encrypt(template, shift);
-  const dictionary = createDictionary(encodedTemplate, false);
-  return text => map(text, dictionary);
+function getOutputStream() {
+  return options.output === undefined ? writeInput() : writeFile();
 }
 
-module.exports.CaesarCipher = {
-  getEncodeFn,
-  getDecodeFn
-};
+function readInput() {
+  return process.stdin.on('data', () => {
+    process.stdin.pause();
+  });
+}
+
+function writeInput() {
+  return new Writable({
+    write(chunk, encoding, callback) {
+      process.stdout.write(`${chunk}\n`);
+      callback(null);
+    }
+  });
+}
+
+function readFile() {
+  return fs.createReadStream(options.input, {
+    flags: 'r'
+  });
+}
+
+function writeFile() {
+  return fs.createWriteStream(options.output, {
+    flags: 'a'
+  });
+}
+
+// function writeInputAgain() {
+//   process.stdout.write(`Do you want to ${options.action} more? (y/n)`);
+//   process.stdin.once('data', data => {
+//     if (data.toString() === 'y') {
+//       process.stdin.resume();
+//     } else {
+//       process.stdin.end();
+//     }
+//   });
+// }
