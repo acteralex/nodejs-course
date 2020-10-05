@@ -36,9 +36,7 @@ OptionsValidator.isValidAsync(options)
 function run() {
   pipeline(getInputStream(), getTransformStream(), getOutputStream(), err => {
     if (err) {
-      // console.log('error');
-    } else {
-      // console.log('then');
+      console.log('Program finished with unhandled error');
     }
   });
 }
