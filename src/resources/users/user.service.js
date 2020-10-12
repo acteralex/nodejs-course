@@ -17,7 +17,7 @@ const createUser = async user => {
   //     throw new Error(`A user with ${user.login} login not be created, because user with this login exists.`);
   // }
   const newUser = new User(user);
-  return usersRepo.createUser(newUser);
+  return await usersRepo.createUser(newUser);
 };
 
 const updateUser = async (userId, user) => {
@@ -28,7 +28,7 @@ const updateUser = async (userId, user) => {
     );
   }
   const newUser = new User({ ...user, id: userId });
-  return usersRepo.updateUser(newUser);
+  return await usersRepo.updateUser(newUser);
 };
 
 const deleteUser = async userId => {
@@ -38,7 +38,7 @@ const deleteUser = async userId => {
       `A user with ${userId} could not be deleted, because user does not exist.`
     );
   }
-  return usersRepo.deleteUser(userId);
+  return await usersRepo.deleteUser(userId);
 };
 
 module.exports = { getAll, getById, createUser, updateUser, deleteUser };

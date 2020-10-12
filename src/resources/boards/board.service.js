@@ -15,7 +15,7 @@ const getById = async boardId => {
 const createBoard = async board => {
   const columns = (board.columns || []).map(c => new Column(c));
   const newBoard = new Board({ ...board, columns });
-  return boardRepo.createBoard(newBoard);
+  return await boardRepo.createBoard(newBoard);
 };
 
 const updateBoard = async (boardId, board) => {
@@ -27,7 +27,7 @@ const updateBoard = async (boardId, board) => {
   }
   const columns = (board.columns || []).map(c => new Column(c));
   const newBoard = new Board({ ...board, columns, id: boardId });
-  return boardRepo.updateBoard(newBoard);
+  return await boardRepo.updateBoard(newBoard);
 };
 
 const deleteBoard = async boardId => {
@@ -37,7 +37,7 @@ const deleteBoard = async boardId => {
       `A board with ${boardId} could not be deleted, because board does not exist.`
     );
   }
-  return boardRepo.deleteBoard(boardId);
+  return await boardRepo.deleteBoard(boardId);
 };
 
 module.exports = { getAll, getById, createBoard, updateBoard, deleteBoard };
