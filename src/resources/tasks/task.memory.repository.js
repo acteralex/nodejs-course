@@ -32,6 +32,11 @@ const deleteTask = async (boardId, taskId) => {
   }
 };
 
+const deleteTasksByBoardId = async boardId => {
+  const tasks = data.filter(item => item.boardId !== boardId);
+  data.splice(0, data.length, ...tasks);
+};
+
 function mapTask(task) {
   return {
     id: task.id,
@@ -49,5 +54,6 @@ module.exports = {
   getTaskById,
   createTask,
   updateTask,
-  deleteTask
+  deleteTask,
+  deleteTasksByBoardId
 };

@@ -1,6 +1,7 @@
 const Board = require('./board.model');
 const boardRepo = require('./board.memory.repository');
 const Column = require('../columns/column.model');
+const taskService = require('../tasks/task.service');
 
 const getAll = () => boardRepo.getAll();
 
@@ -37,7 +38,9 @@ const deleteBoard = async boardId => {
       `A board with ${boardId} could not be deleted, because board does not exist.`
     );
   }
-  return await boardRepo.deleteBoard(boardId);
+  await taskService.deleteTasksByBoardId().then(() => {
+    boardRepo.deleteBoard(boardId);
+  });
 };
 
 module.exports = { getAll, getById, createBoard, updateBoard, deleteBoard };
