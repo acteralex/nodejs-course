@@ -11,12 +11,14 @@ router.route('/users').get(async (req, res) => {
 });
 
 router.route('/users/:userId').get(async (req, res) => {
-  try {
-    const user = await usersService.getById(req.params.userId);
-    res.status(200).json(User.toResponse(user));
-  } catch {
-    res.status(404);
-  }
+  await usersService
+    .getById(req.params.userId)
+    .then(user => {
+      res.status(200).json(User.toResponse(user));
+    })
+    .catch(() => {
+      res.status(404);
+    });
   res.end();
 });
 
@@ -24,12 +26,12 @@ router.route('/users').post(async (req, res) => {
   if (!User.isValidForCreate(req.body)) {
     res.status(400);
   } else {
-    try {
-      const newUser = await usersService.createUser(req.body);
-      res.status(200).json(User.toResponse(newUser));
-    } catch {
-      res.status(400);
-    }
+    await usersService
+      .createUser(req.body)
+      .then(newUser => {
+        res.status(200).json(User.toResponse(newUser));
+      })
+      .catch(() => res.status(400));
   }
   res.end();
 });
@@ -38,26 +40,19 @@ router.route('/users/:userId').put(async (req, res) => {
   if (!User.isValidForUpdate(req.body)) {
     res.status(400);
   } else {
-    try {
-      const newUser = await usersService.updateUser(
-        req.params.userId,
-        req.body
-      );
-      res.status(200).json(User.toResponse(newUser));
-    } catch {
-      res.status(400);
-    }
+    await usersService
+      .updateUser(req.params.userId, req.body)
+      .then(newUser => res.status(200).json(User.toResponse(newUser)))
+      .catch(() => res.status(400));
   }
   res.end();
 });
 
 router.route('/users/:userId').delete(async (req, res) => {
-  try {
-    await usersService.deleteUser(req.params.userId);
-    res.status(204);
-  } catch {
-    res.status(404);
-  }
+  await usersService
+    .deleteUser(req.params.userId)
+    .then(() => res.status(204))
+    .catch(() => res.status(404));
   res.end();
 });
 
