@@ -42,11 +42,14 @@ const deleteTask = async (boardId, taskId) => {
 const deleteTasksByBoardId = async boardId =>
   tasksRepo.deleteTasksByBoardId(boardId);
 
+const unassignUser = async userId => tasksRepo.unassignUser(userId);
+
 module.exports = {
   getAllTasksByBoardId,
   getTaskById,
   createTask,
   updateTask,
   deleteTask,
-  deleteTasksByBoardId
+  deleteTasksByBoardId,
+  unassignUser
 };

@@ -38,8 +38,8 @@ const deleteBoard = async boardId => {
       `A board with ${boardId} could not be deleted, because board does not exist.`
     );
   }
-  await taskService.deleteTasksByBoardId().then(() => {
-    boardRepo.deleteBoard(boardId);
+  return await boardRepo.deleteBoard(boardId).then(() => {
+    taskService.deleteTasksByBoardId(boardId);
   });
 };
 

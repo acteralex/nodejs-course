@@ -1,5 +1,6 @@
 const User = require('./user.model');
 const usersRepo = require('./user.memory.repository');
+const tasksService = require('../tasks/task.service');
 
 const getAll = () => usersRepo.getAll();
 
@@ -38,7 +39,9 @@ const deleteUser = async userId => {
       `A user with ${userId} could not be deleted, because user does not exist.`
     );
   }
-  return await usersRepo.deleteUser(userId);
+  return await usersRepo.deleteUser(userId).then(() => {
+    tasksService.unassignUser(userId);
+  });
 };
 
 module.exports = { getAll, getById, createUser, updateUser, deleteUser };
