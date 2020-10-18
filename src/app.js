@@ -10,19 +10,12 @@ const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
 
 const app = express();
 
-process
-  .on('uncaughtException', err => {
-    logger.error(err.stack);
-  })
-  .on('unhandledRejection', reason => {
-    if (typeof reason === 'string') {
-      logger.error(reason);
-    } else {
-      logger.error(JSON.stringify(reason));
-    }
-  });
-
 app.use(express.json());
+
+app.use((req, res, next) => {
+  logger.requestInfo(req);
+  next();
+});
 
 app.use('/doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
@@ -37,5 +30,17 @@ app.use('/', (req, res, next) => {
 app.use(userRouter);
 app.use(boardRouter);
 app.use(taskRouter);
+
+process
+  .on('uncaughtException', err => {
+    logger.error(err.stack);
+  })
+  .on('unhandledRejection', reason => {
+    if (typeof reason === 'string') {
+      logger.error(reason);
+    } else {
+      logger.error(JSON.stringify(reason));
+    }
+  });
 
 module.exports = app;
