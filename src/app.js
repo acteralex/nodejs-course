@@ -5,9 +5,22 @@ const YAML = require('yamljs');
 const userRouter = require('./resources/users/user.router');
 const boardRouter = require('./resources/boards/board.router');
 const taskRouter = require('./resources/tasks/task.router');
+const logger = require('./common/logger');
+const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
 
 const app = express();
-const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
+
+process
+  .on('uncaughtException', err => {
+    logger.error(err.stack);
+  })
+  .on('unhandledRejection', reason => {
+    if (typeof reason === 'string') {
+      logger.error(reason);
+    } else {
+      logger.error(JSON.stringify(reason));
+    }
+  });
 
 app.use(express.json());
 
