@@ -13,10 +13,6 @@ const getById = async userId => {
 };
 
 const createUser = async user => {
-  // const existUser = await usersRepo.getByLogin(user.login);
-  // if (existUser) {
-  //     throw new Error(`A user with ${user.login} login not be created, because user with this login exists.`);
-  // }
   const newUser = new User(user);
   return await usersRepo.createUser(newUser);
 };
