@@ -1,5 +1,4 @@
 const { transports, createLogger, format } = require('winston');
-// const { timestamp, printf } = winston.format;
 
 const delimeter = '===========================================================';
 const dateFormat = 'DD-MMM-YYYY HH:mm:ss:SSS';
@@ -10,33 +9,29 @@ const loggerFormat = format.printf(({ level, message, label, timestamp }) => {
             \r\n${delimeter}`;
 });
 
-const unhandledLogger = createLogger({
-  level: 'error',
-  format: format.combine(
-    format.label({ label: 'Unhandled' }),
-    format.timestamp({ format: dateFormat }),
-    loggerFormat
-  ),
-  transports: [
-    new transports.Console(),
-    new transports.File({ filename: 'logs.log' })
-  ]
+const errorTransport = new transports.File({
+  filename: 'logs.log',
+  level: 'error'
+});
+const infoTransport = new transports.File({
+  filename: 'requests-logs.log',
+  level: 'info'
 });
 
-const requestLogger = createLogger({
+const logger = createLogger({
   format: format.combine(
     format.label({ label: 'Request' }),
     format.timestamp({ format: dateFormat }),
     loggerFormat
   ),
-  transports: [
-    new transports.Console(),
-    new transports.File({ filename: 'requests-logs.log' })
-  ]
+  transports: [new transports.Console(), errorTransport, infoTransport]
 });
 
-function error(message) {
-  unhandledLogger.error(message);
+function error(message, onFinishCallback) {
+  if (onFinishCallback) {
+    errorTransport.on('finish', () => onFinishCallback());
+  }
+  logger.error(message);
 }
 
 function requestInfo(req) {
@@ -44,7 +39,7 @@ function requestInfo(req) {
 }
 
 function requestLog(level, req) {
-  requestLogger.log(
+  logger.log(
     level,
     `
     url: ${req.method} ${req.originalUrl}\r\n
