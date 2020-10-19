@@ -1,12 +1,14 @@
 const Task = require('./task.model');
 const tasksRepo = require('./task.memory.repository');
+const { HttpError } = require('../../common/http.error');
 
 const getAllTasksByBoardId = boardId => tasksRepo.getAllTasksByBoardId(boardId);
 
 const getTaskById = async (boardId, taskId) => {
   const existTask = await tasksRepo.getTaskById(boardId, taskId);
   if (!existTask) {
-    throw new Error(
+    throw new HttpError(
+      404,
       `A task with ${taskId} id in a board with ${boardId} id was not found.`
     );
   }
@@ -21,7 +23,8 @@ const createTask = async (boardId, task) => {
 const updateTask = async (boardId, taskId, task) => {
   const existTask = await tasksRepo.getTaskById(boardId, taskId);
   if (!existTask) {
-    throw new Error(
+    throw new HttpError(
+      400,
       `A task with ${taskId} id in a board with ${boardId} id could not be updated.`
     );
   }
@@ -32,7 +35,8 @@ const updateTask = async (boardId, taskId, task) => {
 const deleteTask = async (boardId, taskId) => {
   const existTask = await tasksRepo.getTaskById(boardId, taskId);
   if (!existTask) {
-    throw new Error(
+    throw new HttpError(
+      404,
       `A task with ${taskId} id in a board with ${boardId} could not be deleted.`
     );
   }

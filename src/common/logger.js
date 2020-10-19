@@ -43,10 +43,6 @@ function requestInfo(req) {
   requestLog('info', req);
 }
 
-function requestError(req) {
-  requestLog('error', req);
-}
-
 function requestLog(level, req) {
   requestLogger.log(
     level,
@@ -60,6 +56,5 @@ function requestLog(level, req) {
 
 module.exports = {
   error,
-  requestInfo,
-  requestError
+  requestInfo
 };

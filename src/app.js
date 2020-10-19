@@ -31,6 +31,18 @@ app.use(userRouter);
 app.use(boardRouter);
 app.use(taskRouter);
 
+app.use((err, req, res) => {
+  if (err.status !== undefined) {
+    if (err.message !== undefined) {
+      res.status(err.status).send(err.message);
+    } else {
+      res.sendStatus(err.status);
+    }
+  } else {
+    res.sendStatus(500);
+  }
+});
+
 process
   .on('uncaughtException', err => {
     logger.error(err.stack);
