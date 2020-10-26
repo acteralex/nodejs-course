@@ -26,11 +26,9 @@ const updateUser = async (userId, userData) => {
   if (!UserUtils.isValidId(userId)) {
     throw new HttpError(400, 'Wrong type Id.');
   }
-  return await User.findByIdAndUpdate(
-    userId,
-    { $set: { ...userData } },
-    { useFindAndModify: false }
-  ).exec((err, res) => {
+  return await User.findByIdAndUpdate(userId, userData, {
+    useFindAndModify: false
+  }).exec((err, res) => {
     if (!res) {
       throw new HttpError(
         400,

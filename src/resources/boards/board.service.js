@@ -28,7 +28,7 @@ const updateBoard = async (boardId, boardData) => {
   }
   return await Board.findByIdAndUpdate(
     boardId,
-    { $set: { ...boardData } },
+    { ...boardData },
     { useFindAndModify: false }
   ).exec((err, res) => {
     if (!res) {

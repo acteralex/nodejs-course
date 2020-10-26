@@ -20,9 +20,7 @@ const getTaskById = async (boardId, taskId) => {
     throw new HttpError(400, 'Wrong type taskId.');
   }
 
-  const task = await Task.findById(taskId)
-    .where('boardId', boardId)
-    .exec();
+  const task = await Task.findById(taskId).exec();
   if (!task) {
     throw new HttpError(
       404,
@@ -51,7 +49,7 @@ const updateTask = async (boardId, taskId, taskData) => {
 
   return await Task.findByIdAndUpdate(
     taskId,
-    { $set: { ...taskData, boardId } },
+    { ...taskData, boardId },
     { useFindAndModify: false }
   ).exec((err, res) => {
     if (!res) {
