@@ -32,16 +32,20 @@ app.use(userRouter);
 app.use(boardRouter);
 app.use(taskRouter);
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   if (err.status !== undefined) {
     if (err.message !== undefined) {
-      res.status(err.status).send(err.message);
+      res
+        .status(err.status)
+        .contentType('text/plain; charset=utf-8')
+        .send(err.message);
     } else {
       res.sendStatus(err.status);
     }
   } else {
     res.sendStatus(500);
   }
+  next();
 });
 
 process

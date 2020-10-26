@@ -1,16 +1,20 @@
-const uuid = require('uuid');
+const mongoose = require('mongoose');
+const { columnSchema } = require('../columns/column.schema');
 
-class Column {
-  constructor({ id = uuid(), title = 'TITLE', order = 0 } = {}) {
-    this.id = id;
-    this.title = title;
-    this.order = order;
-  }
+const Column = mongoose.model('Column', columnSchema);
 
+class ColumnUtils {
   static toResponse(column) {
     const { id, title, order } = column;
     return { id, title, order };
   }
+
+  static isValidId(id) {
+    return mongoose.Types.ObjectId.isValid(id);
+  }
 }
 
-module.exports = Column;
+module.exports = {
+  Column,
+  ColumnUtils
+};

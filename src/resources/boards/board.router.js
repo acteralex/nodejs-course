@@ -1,44 +1,32 @@
 const router = require('express').Router();
-const Board = require('./board.model');
 const boardService = require('./board.service');
 const { catcher } = require('../../common/catcher');
 
 router.route('/boards').get(
   catcher(async (req, res) => {
     const boards = await boardService.getAll();
-    res.status(200).json(boards.map(Board.toResponse));
+    res.status(200).json(boards);
   })
 );
 
 router.route('/boards/:boardId').get(
   catcher(async (req, res) => {
     const board = await boardService.getById(req.params.boardId);
-    res.status(200).json(Board.toResponse(board));
+    res.status(200).json(board);
   })
 );
 
 router.route('/boards').post(
   catcher(async (req, res) => {
-    if (!Board.isValidForCreate(req.body)) {
-      res.status(400).end();
-    } else {
-      const newBoard = await boardService.createBoard(req.body);
-      res.status(200).json(Board.toResponse(newBoard));
-    }
+    const board = await boardService.createBoard(req.body);
+    res.status(200).json(board);
   })
 );
 
 router.route('/boards/:boardId').put(
   catcher(async (req, res) => {
-    if (!Board.isValidForUpdate(req.body)) {
-      res.status(400).end();
-    } else {
-      const newBoard = await boardService.updateBoard(
-        req.params.boardId,
-        req.body
-      );
-      res.status(200).json(Board.toResponse(newBoard));
-    }
+    const board = await boardService.updateBoard(req.params.boardId, req.body);
+    res.status(200).json(board);
   })
 );
 
