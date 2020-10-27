@@ -3,14 +3,14 @@ const { HttpError } = require('../../common/http.error');
 const tasksService = require('../tasks/task.service');
 
 const getAll = async () => {
-  return (await User.find().exec()).map(UserUtils.toResponse);
+  return (await User.find()).map(UserUtils.toResponse);
 };
 
 const getById = async userId => {
   if (!UserUtils.isValidId(userId)) {
     throw new HttpError(400, 'Wrong type Id.');
   }
-  const user = await User.findById(userId).exec();
+  const user = await User.findById(userId);
   if (!user) {
     throw new HttpError(404, `A user with ${userId} id was not found.`);
   }

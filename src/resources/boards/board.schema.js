@@ -1,13 +1,19 @@
 const { Schema } = require('mongoose');
-const { columnSchema } = require('../columns/column.schema');
 
 const boardSchema = new Schema(
   {
     title: { type: String, required: true },
-    columns: [columnSchema]
+    columns: [
+      {
+        title: { type: String, required: true },
+        order: Number
+      }
+    ]
   },
   {
-    collection: 'boards'
+    id: true,
+    collection: 'boards',
+    versionKey: false
   }
 );
 

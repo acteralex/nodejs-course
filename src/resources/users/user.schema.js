@@ -7,7 +7,9 @@ const userSchema = new Schema(
     password: { type: String, required: true }
   },
   {
-    collection: 'users'
+    id: true,
+    collection: 'users',
+    versionKey: false
   }
 );
 

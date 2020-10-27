@@ -3,14 +3,14 @@ const { HttpError } = require('../../common/http.error');
 const { Board, BoardUtils } = require('./board.model');
 
 const getAll = async () => {
-  return (await Board.find().exec()).map(BoardUtils.toResponse);
+  return (await Board.find()).map(BoardUtils.toResponse);
 };
 
 const getById = async boardId => {
   if (!BoardUtils.isValidId(boardId)) {
     throw new HttpError(400, 'Wrong type Id.');
   }
-  const board = await Board.findById(boardId).exec();
+  const board = await Board.findById(boardId);
   if (!board) {
     throw new HttpError(404, `A board with ${boardId} id was not found.`);
   }

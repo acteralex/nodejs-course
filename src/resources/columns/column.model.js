@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-const { columnSchema } = require('../columns/column.schema');
-
-const Column = mongoose.model('Column', columnSchema);
 
 class ColumnUtils {
   static toResponse(column) {
@@ -15,6 +12,5 @@ class ColumnUtils {
 }
 
 module.exports = {
-  Column,
   ColumnUtils
 };
