@@ -11,7 +11,6 @@ const boardSchema = new Schema(
     ]
   },
   {
-    id: true,
     collection: 'boards',
     versionKey: false
   }

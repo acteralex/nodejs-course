@@ -18,9 +18,4 @@ mongoose.connection.on(
 
 mongoose.connection.on('open', async () => {
   console.log('mongodb is connected.');
-  // console.log('Database is dropping...');
-
-  // mongoose.connection.dropDatabase()
-  //   .then(() => console.log('Database is dropped.'))
-  //   .catch(() => console.log('Error when database was dropping.'));
 });

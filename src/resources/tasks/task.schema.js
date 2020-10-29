@@ -10,7 +10,6 @@ const taskSchema = new Schema(
     columnId: Types.ObjectId
   },
   {
-    id: true,
     collection: 'tasks',
     versionKey: false
   }

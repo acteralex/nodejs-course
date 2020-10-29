@@ -3,53 +3,57 @@ const { HttpError } = require('../../common/http.error');
 const tasksService = require('../tasks/task.service');
 
 const getAll = async () => {
-  return (await User.find()).map(UserUtils.toResponse);
+  return await User.find().exec();
 };
 
 const getById = async userId => {
   if (!UserUtils.isValidId(userId)) {
     throw new HttpError(400, 'Wrong type Id.');
   }
-  const user = await User.findById(userId);
+
+  const user = await User.findById(userId).exec();
   if (!user) {
     throw new HttpError(404, `A user with ${userId} id was not found.`);
   }
-  return UserUtils.toResponse(user);
+  return user;
 };
 
 const createUser = async userData => {
-  const user = await User.create(userData);
-  return UserUtils.toResponse(user);
+  return await User.create(userData);
 };
 
 const updateUser = async (userId, userData) => {
   if (!UserUtils.isValidId(userId)) {
     throw new HttpError(400, 'Wrong type Id.');
   }
-  return await User.findByIdAndUpdate(userId, userData, {
+
+  const user = await User.findByIdAndUpdate(userId, userData, {
     useFindAndModify: false
-  }).exec((err, res) => {
-    if (!res) {
-      throw new HttpError(
-        400,
-        `A user with ${userId} could not be updated, because user does not exist.`
-      );
-    }
-  });
+  }).exec();
+
+  if (!user) {
+    throw new HttpError(
+      400,
+      `A user with ${userId} could not be updated, because user does not exist.`
+    );
+  }
+
+  return user;
 };
 
 const deleteUser = async userId => {
   if (!UserUtils.isValidId(userId)) {
     throw new HttpError(400, 'Wrong type Id.');
   }
-  await User.findByIdAndDelete(userId).exec(async (err, res) => {
+
+  await User.findByIdAndDelete(userId, (err, res) => {
     if (!res) {
       throw new HttpError(
         404,
         `A user with ${userId} could not be deleted, because user does not exist.`
       );
     }
-  });
+  }).exec();
   await tasksService.unassignUser(userId);
 };
 

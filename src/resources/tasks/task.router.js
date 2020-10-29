@@ -1,12 +1,13 @@
 const router = require('express').Router();
 const taskService = require('./task.service');
 const { catcher } = require('../../common/catcher');
+const { TaskUtils } = require('./task.model');
 
 router.route('/boards/:boardId/tasks').get(
   catcher(
     async (req, res) => {
       const tasks = await taskService.getAllTasksByBoardId(req.params.boardId);
-      res.status(200).json(tasks);
+      res.status(200).json(tasks.map(TaskUtils.toResponse));
     },
     (req, res) => {
       res.sendStatus(400);
@@ -20,14 +21,14 @@ router.route('/boards/:boardId/tasks/:taskId').get(
       req.params.boardId,
       req.params.taskId
     );
-    res.status(200).json(task);
+    res.status(200).json(TaskUtils.toResponse(task));
   })
 );
 
 router.route('/boards/:boardId/tasks').post(
   catcher(async (req, res) => {
     const task = await taskService.createTask(req.params.boardId, req.body);
-    res.status(200).json(task);
+    res.status(200).json(TaskUtils.toResponse(task));
   })
 );
 
@@ -38,14 +39,14 @@ router.route('/boards/:boardId/tasks/:taskId').put(
       req.params.taskId,
       req.body
     );
-    res.status(200).json(task);
+    res.status(200).json(TaskUtils.toResponse(task));
   })
 );
 
 router.route('/boards/:boardId/tasks/:taskId').delete(
   catcher(async (req, res) => {
     await taskService.deleteTask(req.params.boardId, req.params.taskId);
-    res.status(200).end();
+    res.sendStatus(200);
   })
 );
 

@@ -5,7 +5,7 @@ const getAllTasksByBoardId = async boardId => {
   if (!TaskUtils.isValidId(boardId)) {
     throw new HttpError(400, 'Wrong type boardId.');
   }
-  return (await Task.find().find({ boardId })).map(TaskUtils.toResponse);
+  return await Task.find({ boardId }).exec();
 };
 
 const getTaskById = async (boardId, taskId) => {
@@ -16,23 +16,21 @@ const getTaskById = async (boardId, taskId) => {
     throw new HttpError(400, 'Wrong type taskId.');
   }
 
-  const task = await Task.findById(taskId);
+  const task = await Task.findById(taskId).exec();
   if (!task) {
     throw new HttpError(
       404,
       `A task with ${taskId} id in a board with ${boardId} id was not found.`
     );
   }
-  return TaskUtils.toResponse(task);
+  return task;
 };
 
 const createTask = async (boardId, taskData) => {
   if (!TaskUtils.isValidId(boardId)) {
     throw new HttpError(400, 'Wrong type boardId.');
   }
-
-  const task = await Task.create({ ...taskData, boardId });
-  return TaskUtils.toResponse(task);
+  return await Task.create({ ...taskData, boardId });
 };
 
 const updateTask = async (boardId, taskId, taskData) => {
@@ -43,18 +41,20 @@ const updateTask = async (boardId, taskId, taskData) => {
     throw new HttpError(400, 'Wrong type taskId.');
   }
 
-  return await Task.findByIdAndUpdate(
+  const task = await Task.findByIdAndUpdate(
     taskId,
     { ...taskData, boardId },
     { useFindAndModify: false }
-  ).exec((err, res) => {
-    if (!res) {
-      throw new HttpError(
-        400,
-        `A task with ${taskId} id in a board with ${boardId} id could not be updated.`
-      );
-    }
-  });
+  ).exec();
+
+  if (!task) {
+    throw new HttpError(
+      400,
+      `A task with ${taskId} id in a board with ${boardId} id could not be updated.`
+    );
+  }
+
+  return task;
 };
 
 const deleteTask = async (boardId, taskId) => {
@@ -65,22 +65,22 @@ const deleteTask = async (boardId, taskId) => {
     throw new HttpError(400, 'Wrong type taskId.');
   }
 
-  await Task.findByIdAndDelete(taskId).exec((err, res) => {
+  await Task.findByIdAndDelete(taskId, (err, res) => {
     if (!res) {
       throw new HttpError(
         404,
         `A task with ${taskId} id in a board with ${boardId} could not be deleted.`
       );
     }
-  });
+  }).exec();
 };
 
 const deleteTasksByBoardId = async boardId => {
-  await Task.deleteMany({ boardId });
+  await Task.deleteMany({ boardId }, () => {}).exec();
 };
 
 const unassignUser = async userId => {
-  await Task.updateMany({ userId }, { $set: { userId: null } });
+  await Task.updateMany({ userId }, { $set: { userId: null } }).exec();
 };
 
 module.exports = {
