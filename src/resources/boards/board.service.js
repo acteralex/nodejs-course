@@ -1,49 +1,62 @@
-const Board = require('./board.model');
-const boardRepo = require('./board.memory.repository');
-const Column = require('../columns/column.model');
-const taskService = require('../tasks/task.service');
+const tasksService = require('../tasks/task.service');
 const { HttpError } = require('../../common/http.error');
+const { Board, BoardUtils } = require('./board.model');
 
-const getAll = () => boardRepo.getAll();
+const getAll = async () => {
+  return await Board.find().exec();
+};
 
 const getById = async boardId => {
-  const existBoard = await boardRepo.getById(boardId);
-  if (!existBoard) {
+  if (!BoardUtils.isValidId(boardId)) {
+    throw new HttpError(400, 'Wrong type Id.');
+  }
+
+  const board = await Board.findById(boardId).exec();
+  if (!board) {
     throw new HttpError(404, `A board with ${boardId} id was not found.`);
   }
-  return existBoard;
+  return board;
 };
 
-const createBoard = async board => {
-  const columns = (board.columns || []).map(c => new Column(c));
-  const newBoard = new Board({ ...board, columns });
-  return await boardRepo.createBoard(newBoard);
+const createBoard = async boardData => {
+  return await Board.create({ ...boardData });
 };
 
-const updateBoard = async (boardId, board) => {
-  const existBoard = await boardRepo.getById(boardId);
-  if (!existBoard) {
+const updateBoard = async (boardId, boardData) => {
+  if (!BoardUtils.isValidId(boardId)) {
+    throw new HttpError(400, 'Wrong type Id.');
+  }
+
+  const board = await Board.findByIdAndUpdate(
+    boardId,
+    { ...boardData },
+    { useFindAndModify: false }
+  ).exec();
+
+  if (!board) {
     throw new HttpError(
       400,
       `A board with ${boardId} could not be updated, because board does not exist.`
     );
   }
-  const columns = (board.columns || []).map(c => new Column(c));
-  const newBoard = new Board({ ...board, columns, id: boardId });
-  return await boardRepo.updateBoard(newBoard);
+
+  return board;
 };
 
 const deleteBoard = async boardId => {
-  const existBoard = await boardRepo.getById(boardId);
-  if (!existBoard) {
-    throw new HttpError(
-      404,
-      `A board with ${boardId} could not be deleted, because board does not exist.`
-    );
+  if (!BoardUtils.isValidId(boardId)) {
+    throw new HttpError(400, 'Wrong type Id.');
   }
-  return await boardRepo.deleteBoard(boardId).then(() => {
-    taskService.deleteTasksByBoardId(boardId);
-  });
+
+  await Board.findByIdAndDelete(boardId, (err, res) => {
+    if (!res) {
+      throw new HttpError(
+        404,
+        `A board with ${boardId} could not be deleted, because board does not exist.`
+      );
+    }
+  }).exec();
+  await tasksService.deleteTasksByBoardId(boardId);
 };
 
 module.exports = { getAll, getById, createBoard, updateBoard, deleteBoard };

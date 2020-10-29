@@ -1,46 +1,60 @@
-const User = require('./user.model');
-const usersRepo = require('./user.memory.repository');
-const tasksService = require('../tasks/task.service');
+const { User, UserUtils } = require('./user.model');
 const { HttpError } = require('../../common/http.error');
+const tasksService = require('../tasks/task.service');
 
-const getAll = () => usersRepo.getAll();
+const getAll = async () => {
+  return await User.find().exec();
+};
 
 const getById = async userId => {
-  const existUser = await usersRepo.getById(userId);
-  if (!existUser) {
+  if (!UserUtils.isValidId(userId)) {
+    throw new HttpError(400, 'Wrong type Id.');
+  }
+
+  const user = await User.findById(userId).exec();
+  if (!user) {
     throw new HttpError(404, `A user with ${userId} id was not found.`);
   }
-  return existUser;
+  return user;
 };
 
-const createUser = async user => {
-  const newUser = new User(user);
-  return await usersRepo.createUser(newUser);
+const createUser = async userData => {
+  return await User.create(userData);
 };
 
-const updateUser = async (userId, user) => {
-  const existUser = await usersRepo.getById(userId);
-  if (!existUser) {
+const updateUser = async (userId, userData) => {
+  if (!UserUtils.isValidId(userId)) {
+    throw new HttpError(400, 'Wrong type Id.');
+  }
+
+  const user = await User.findByIdAndUpdate(userId, userData, {
+    useFindAndModify: false
+  }).exec();
+
+  if (!user) {
     throw new HttpError(
       400,
       `A user with ${userId} could not be updated, because user does not exist.`
     );
   }
-  const newUser = new User({ ...user, id: userId });
-  return await usersRepo.updateUser(newUser);
+
+  return user;
 };
 
 const deleteUser = async userId => {
-  const existUser = await usersRepo.getById(userId);
-  if (!existUser) {
-    throw new HttpError(
-      404,
-      `A user with ${userId} could not be deleted, because user does not exist.`
-    );
+  if (!UserUtils.isValidId(userId)) {
+    throw new HttpError(400, 'Wrong type Id.');
   }
-  return await usersRepo.deleteUser(userId).then(() => {
-    tasksService.unassignUser(userId);
-  });
+
+  await User.findByIdAndDelete(userId, (err, res) => {
+    if (!res) {
+      throw new HttpError(
+        404,
+        `A user with ${userId} could not be deleted, because user does not exist.`
+      );
+    }
+  }).exec();
+  await tasksService.unassignUser(userId);
 };
 
 module.exports = { getAll, getById, createUser, updateUser, deleteUser };

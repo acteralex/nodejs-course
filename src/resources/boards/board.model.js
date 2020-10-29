@@ -1,30 +1,20 @@
-const uuid = require('uuid');
+const mongoose = require('mongoose');
+const { boardSchema } = require('./board.schema');
 
-class Board {
-  constructor({ id = uuid(), title, columns = [] } = {}) {
-    this.id = id;
-    this.title = title;
-    this.columns = columns;
-  }
+const Board = mongoose.model('Board', boardSchema);
 
+class BoardUtils {
   static toResponse(board) {
     const { id, title, columns } = board;
     return { id, title, columns };
   }
 
-  static isValidForCreate(board) {
-    if (!board.title || !board.columns) {
-      return false;
-    }
-    return true;
-  }
-
-  static isValidForUpdate(board) {
-    if (!board.title || !board.columns) {
-      return false;
-    }
-    return true;
+  static isValidId(id) {
+    return mongoose.Types.ObjectId.isValid(id);
   }
 }
 
-module.exports = Board;
+module.exports = {
+  Board,
+  BoardUtils
+};
