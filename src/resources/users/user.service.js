@@ -1,6 +1,7 @@
 const { User, UserUtils } = require('./user.model');
 const { HttpError } = require('../../common/http.error');
 const tasksService = require('../tasks/task.service');
+const Hasher = require('../../common/hasher');
 
 const getAll = async () => {
   return await User.find().exec();
@@ -19,7 +20,8 @@ const getById = async userId => {
 };
 
 const createUser = async userData => {
-  return await User.create(userData);
+  const passwordHash = await Hasher.hash(userData.password);
+  return await User.create({ ...userData, password: passwordHash });
 };
 
 const updateUser = async (userId, userData) => {
