@@ -8,7 +8,7 @@ const Authentication = catcher(async (req, res, next) => {
     const [prefix, value] = authHeaderValue && authHeaderValue.split(' ');
     if (prefix === 'Bearer' && Token.isValid(value)) {
       // eslint-disable-next-line callback-return
-      next();
+      return next();
     }
   }
   throw new HttpError(401);
