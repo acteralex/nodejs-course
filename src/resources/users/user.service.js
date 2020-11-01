@@ -20,7 +20,7 @@ const getById = async userId => {
 };
 
 const createUser = async userData => {
-  const passwordHash = await Hasher.hash(userData.password);
+  const passwordHash = await Hasher.hashAsync(userData.password);
   return await User.create({ ...userData, password: passwordHash });
 };
 
