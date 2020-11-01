@@ -29,10 +29,7 @@ app.use('/', (req, res, next) => {
   next();
 });
 
-app.use(loginRouter);
-app.use(userRouter);
-app.use(boardRouter);
-app.use(taskRouter);
+app.use(loginRouter, userRouter, boardRouter, taskRouter);
 
 app.use((err, req, res, next) => {
   if (err.status !== undefined) {

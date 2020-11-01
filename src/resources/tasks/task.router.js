@@ -1,9 +1,13 @@
 const router = require('express').Router();
+const childRouter = require('express').Router({ mergeParams: true });
 const taskService = require('./task.service');
 const { catcher } = require('../../common/catcher');
 const { TaskUtils } = require('./task.model');
+const { Authentication } = require('../../common/authentication');
 
-router.route('/boards/:boardId/tasks').get(
+router.use('/boards/:boardId/tasks', Authentication, childRouter);
+
+childRouter.route('/').get(
   catcher(
     async (req, res) => {
       const tasks = await taskService.getAllTasksByBoardId(req.params.boardId);
@@ -15,7 +19,7 @@ router.route('/boards/:boardId/tasks').get(
   )
 );
 
-router.route('/boards/:boardId/tasks/:taskId').get(
+childRouter.route('/:taskId').get(
   catcher(async (req, res) => {
     const task = await taskService.getTaskById(
       req.params.boardId,
@@ -25,14 +29,14 @@ router.route('/boards/:boardId/tasks/:taskId').get(
   })
 );
 
-router.route('/boards/:boardId/tasks').post(
+childRouter.route('/').post(
   catcher(async (req, res) => {
     const task = await taskService.createTask(req.params.boardId, req.body);
     res.status(200).json(TaskUtils.toResponse(task));
   })
 );
 
-router.route('/boards/:boardId/tasks/:taskId').put(
+childRouter.route('/:taskId').put(
   catcher(async (req, res) => {
     const task = await taskService.updateTask(
       req.params.boardId,
@@ -43,7 +47,7 @@ router.route('/boards/:boardId/tasks/:taskId').put(
   })
 );
 
-router.route('/boards/:boardId/tasks/:taskId').delete(
+childRouter.route('/:taskId').delete(
   catcher(async (req, res) => {
     await taskService.deleteTask(req.params.boardId, req.params.taskId);
     res.sendStatus(200);
