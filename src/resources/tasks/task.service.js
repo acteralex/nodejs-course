@@ -44,7 +44,7 @@ const updateTask = async (boardId, taskId, taskData) => {
   const task = await Task.findByIdAndUpdate(
     taskId,
     { ...taskData, boardId },
-    { useFindAndModify: false }
+    { useFindAndModify: false, new: true }
   ).exec();
 
   if (!task) {

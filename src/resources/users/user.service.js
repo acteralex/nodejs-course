@@ -28,10 +28,15 @@ const updateUser = async (userId, userData) => {
   if (!UserUtils.isValidId(userId)) {
     throw new HttpError(400, 'Wrong type Id.');
   }
-
-  const user = await User.findByIdAndUpdate(userId, userData, {
-    useFindAndModify: false
-  }).exec();
+  const passwordHash = await Hasher.hashAsync(userData.password);
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { ...userData, password: passwordHash },
+    {
+      useFindAndModify: false,
+      new: true
+    }
+  ).exec();
 
   if (!user) {
     throw new HttpError(

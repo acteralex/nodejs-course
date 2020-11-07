@@ -30,7 +30,7 @@ const updateBoard = async (boardId, boardData) => {
   const board = await Board.findByIdAndUpdate(
     boardId,
     { ...boardData },
-    { useFindAndModify: false }
+    { useFindAndModify: false, new: true }
   ).exec();
 
   if (!board) {
